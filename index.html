@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة المعدل التراكمي للتمريض</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles and font */
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        /* Style for input number fields to hide arrows */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white antialiased">
+
+    <!-- Main Container -->
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+
+        <!-- Header -->
+        <header class="text-center mb-8">
+                       <h1 class="text-3xl md:text-4xl font-bold text-cyan-400 mb-2">مطور: mohammed hemida</h1>
+
+            <h1 class="text-3xl md:text-4xl font-bold text-cyan-400 mb-2">حاسبة المعدل التراكمي (GPA)</h1>
+            <p class="text-slate-400">مصممة خصيصًا لطلاب التمريض</p>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+            <!-- Left Column: Subjects & Actions -->
+            <div class="md:col-span-2 bg-slate-800 p-6 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4 border-b-2 border-slate-700 pb-2">المواد الدراسية</h2>
+                
+                <!-- Subjects List Container -->
+                <div id="subjects-list" class="space-y-4 mb-4">
+                    <!-- Subject rows will be injected here by JavaScript -->
+                </div>
+
+                <!-- Action Button -->
+                <button id="add-subject-btn" class="w-full bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-75">
+                    إضافة مادة جديدة
+                </button>
+            </div>
+
+            <!-- Right Column: Calculation & Result -->
+            <div class="md:col-span-1 space-y-6">
+                <!-- Calculation Formula -->
+                <div class="bg-slate-800 p-6 rounded-2xl shadow-lg">
+                    <h3 class="text-xl font-semibold mb-3 text-cyan-400">المعادلة المستخدمة</h3>
+                    <div class="text-sm text-slate-300 space-y-2">
+                        <p><span class="font-bold">1. نقاط المادة الموزونة:</span><br><code class="block text-left dir-ltr bg-slate-900 p-2 rounded-md mt-1 text-cyan-300">عدد الساعات * [(الدرجة - 50) * 0.0106 + 1]</code></p>
+                        <p><span class="font-bold">2. مجموع النقاط:</span><br>يتم جمع نتائج الخطوة 1 لكل المواد.</p>
+                        <p><span class="font-bold">3. المعدل النهائي:</span><br>مجموع النقاط / إجمالي الساعات (الذي تدخله).</p>
+                    </div>
+                </div>
+
+                <!-- Final Calculation -->
+                <div class="bg-slate-800 p-6 rounded-2xl shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4">الحساب النهائي</h3>
+                    <div class="mb-4">
+                        <label for="total-hours-input" class="block mb-2 text-sm font-medium text-slate-300">إجمالي عدد الساعات المعتمدة</label>
+                        <input type="number" id="total-hours-input" placeholder="مثال: 18" class="w-full bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block p-2.5 placeholder-slate-400">
+                    </div>
+                    <button id="calculate-gpa-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75">
+                        احسب المعدل
+                    </button>
+                </div>
+
+                <!-- Result Display -->
+                <div id="result-container" class="bg-slate-800 p-6 rounded-2xl shadow-lg hidden">
+                     <h3 class="text-xl font-semibold mb-4 text-green-400">النتيجة النهائية</h3>
+                     <div class="space-y-3 text-center">
+                        <div>
+                            <p class="text-slate-400 text-sm">مجموع النقاط الموزونة</p>
+                            <p id="total-points-result" class="text-2xl font-bold"></p>
+                        </div>
+                        <div class="pt-2 border-t border-slate-700">
+                            <p class="text-slate-400 text-sm">المعدل التراكمي (GPA)</p>
+                            <p id="gpa-result" class="text-4xl font-bold text-green-400"></p>
+                        </div>
+                     </div>
+                </div>
+
+                 <!-- Error Message Box -->
+                <div id="error-box" class="bg-red-500/20 border border-red-500 text-red-400 p-4 rounded-lg hidden">
+                    <p id="error-message"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const subjectsList = document.getElementById('subjects-list');
+        const addSubjectBtn = document.getElementById('add-subject-btn');
+        const calculateGpaBtn = document.getElementById('calculate-gpa-btn');
+        const totalHoursInput = document.getElementById('total-hours-input');
+        const resultContainer = document.getElementById('result-container');
+        const totalPointsResult = document.getElementById('total-points-result');
+        const gpaResult = document.getElementById('gpa-result');
+        const errorBox = document.getElementById('error-box');
+        const errorMessage = document.getElementById('error-message');
+
+        // State
+        let subjectCounter = 0;
+
+        // --- Functions ---
+
+        /**
+         * Displays an error message.
+         * @param {string} message - The error message to display.
+         */
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorBox.classList.remove('hidden');
+            resultContainer.classList.add('hidden');
+        }
+
+        /**
+         * Hides the error message box.
+         */
+        function hideError() {
+            errorBox.classList.add('hidden');
+        }
+
+        /**
+         * Creates and adds a new subject row to the list.
+         */
+        function addSubject() {
+            subjectCounter++;
+            const subjectId = `subject-${Date.now()}`; // Unique ID for the row
+
+            const subjectDiv = document.createElement('div');
+            subjectDiv.id = subjectId;
+            subjectDiv.className = 'flex items-center gap-2 p-3 bg-slate-700 rounded-lg animate-fade-in';
+            subjectDiv.innerHTML = `
+                <div class="flex-grow grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <input type="text" placeholder="اسم المادة (اختياري)" class="subject-name w-full bg-slate-600 border border-slate-500 text-white text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block p-2.5 placeholder-slate-400" data-default-name="المادة ${subjectCounter}">
+                    <input type="number" placeholder="الدرجة من 100" class="subject-grade w-full bg-slate-600 border border-slate-500 text-white text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block p-2.5 placeholder-slate-400">
+                    <input type="number" placeholder="عدد الساعات" class="subject-hours w-full bg-slate-600 border border-slate-500 text-white text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block p-2.5 placeholder-slate-400">
+                </div>
+                <button class="remove-subject-btn flex-shrink-0 bg-red-500 hover:bg-red-600 text-white font-bold p-2 rounded-full h-10 w-10 flex items-center justify-center transition-transform transform hover:scale-110">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+            `;
+
+            subjectsList.appendChild(subjectDiv);
+
+            // Add event listener to the new remove button
+            subjectDiv.querySelector('.remove-subject-btn').addEventListener('click', () => {
+                subjectDiv.remove();
+            });
+        }
+
+        /**
+         * Calculates the GPA based on the inputs.
+         */
+        function calculateGPA() {
+            hideError();
+            let totalWeightedPoints = 0;
+            let isValid = true;
+
+            const subjectRows = subjectsList.querySelectorAll('.flex.items-center.gap-2');
+            
+            if (subjectRows.length === 0) {
+                showError('الرجاء إضافة مادة واحدة على الأقل.');
+                return;
+            }
+
+            // Loop through each subject row to calculate and sum weighted points
+            subjectRows.forEach(row => {
+                const gradeInput = row.querySelector('.subject-grade');
+                const hoursInput = row.querySelector('.subject-hours');
+                
+                const grade = parseFloat(gradeInput.value);
+                const hours = parseFloat(hoursInput.value);
+
+                // Validation for grade
+                if (isNaN(grade) || grade < 0 || grade > 100) {
+                    gradeInput.classList.add('border-red-500');
+                    gradeInput.classList.remove('border-slate-500');
+                    isValid = false;
+                } else {
+                    gradeInput.classList.remove('border-red-500');
+                    gradeInput.classList.add('border-slate-500');
+                }
+
+                // Validation for hours
+                if (isNaN(hours) || hours <= 0) {
+                    hoursInput.classList.add('border-red-500');
+                    hoursInput.classList.remove('border-slate-500');
+                    isValid = false;
+                } else {
+                    hoursInput.classList.remove('border-red-500');
+                    hoursInput.classList.add('border-slate-500');
+                }
+
+                if (isValid) {
+                    // Calculate the weighted points for the subject
+                    const subjectPoints = (grade - 50) * 0.0106 + 1;
+                    const weightedPoints = subjectPoints * hours;
+                    totalWeightedPoints += weightedPoints;
+                }
+            });
+
+            if (!isValid) {
+                showError('الرجاء إدخال قيم صحيحة لجميع الحقول (الدرجة بين 0-100، والساعات أكبر من 0).');
+                return;
+            }
+            
+            // Get and validate the manually entered total credit hours
+            const manualTotalHours = parseFloat(totalHoursInput.value);
+            if (isNaN(manualTotalHours) || manualTotalHours <= 0) {
+                totalHoursInput.classList.add('border-red-500');
+                totalHoursInput.classList.remove('border-slate-600');
+                showError('الرجاء إدخال إجمالي عدد ساعات صحيح وأكبر من صفر.');
+                return;
+            } else {
+                totalHoursInput.classList.remove('border-red-500');
+                totalHoursInput.classList.add('border-slate-600');
+            }
+
+            // Final GPA calculation using the manually entered total hours
+            const finalGPA = totalWeightedPoints / manualTotalHours;
+
+            // Display results
+            totalPointsResult.textContent = totalWeightedPoints.toFixed(4);
+            gpaResult.textContent = finalGPA.toFixed(4);
+            resultContainer.classList.remove('hidden');
+        }
+
+
+        // --- Event Listeners ---
+        addSubjectBtn.addEventListener('click', addSubject);
+        calculateGpaBtn.addEventListener('click', calculateGPA);
+
+        // --- Initial State ---
+        // Add one subject row by default when the page loads
+        addSubject();
+
+    </script>
+    
+    <!-- Simple fade-in animation for new elements -->
+    <style>
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out forwards;
+        }
+    </style>
+
+</body>
+</html>
