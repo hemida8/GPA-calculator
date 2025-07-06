@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حاسبة المعدل التراكمي للتمريض</title>
+    <title>حاسبة المعدل التراكمي  </title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Cairo -->
@@ -37,6 +37,7 @@
         }
         input[type=number] {
             -moz-appearance: textfield;
+            appearance: textfield;
         }
     </style>
 </head>
@@ -47,10 +48,9 @@
 
         <!-- Header -->
         <header class="text-center mb-8">
-             <h1 class="text-3xl md:text-4xl font-bold text-cyan-200 mb-2">المطور : محمد حميدة</h1>
+                        <h1 class="text-3xl md:text-4xl font-bold text-blue-300 mb-2">المطور : محمد حميدة </h1>
 
-            <h2 class="text-3xl md:text-4xl font-bold text-cyan-400 mb-2">حاسبة المعدل التراكمي (GPA)</h2>
-            <p class="text-slate-400">مصممة خصيصًا لطلاب التمريض</p>
+            <h1 class="text-3xl md:text-4xl font-bold text-cyan-400 mb-2">حاسبة المعدل التراكمي (GPA)</h1>
         </header>
 
         <!-- Main Content Grid -->
@@ -85,10 +85,10 @@
 
                 <!-- Final Calculation -->
                 <div class="bg-slate-800 p-6 rounded-2xl shadow-lg">
-                    <h3 class="text-xl font-semibold mb-4">الحساب النهائي</h3>
+                    <h3 class="text-xl font-semibold mb-4">نتيجة ال gpa</h3>
                     <div class="mb-4">
                         <label for="total-hours-input" class="block mb-2 text-sm font-medium text-slate-300">إجمالي عدد الساعات للقسمة</label>
-                        <input type="number" id="total-hours-input" placeholder="مثال: 19" class="w-full bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block p-2.5 placeholder-slate-400">
+                        <input type="number" id="total-hours-input" placeholder="اكتب مجموع عدد الساعات" class="w-full bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block p-2.5 placeholder-slate-400">
                     </div>
                     <button id="calculate-gpa-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75">
                         احسب المعدل
@@ -97,19 +97,18 @@
 
                 <!-- Result Display -->
                 <div id="result-container" class="bg-slate-800 p-6 rounded-2xl shadow-lg hidden">
-                     <h3 class="text-xl font-semibold mb-4 text-green-400">تفاصيل النتيجة</h3>
+                     <h3 class="text-xl font-semibold mb-4 text-green-400">النتيجة النهائية</h3>
                      <div class="space-y-3 text-center">
                         <div>
                             <p class="text-slate-400 text-sm">مجموع النقاط الموزونة</p>
                             <p id="total-points-result" class="text-2xl font-bold"></p>
                         </div>
-                         <div class="pt-2 border-t border-slate-700">
-                            <p class="text-slate-400 text-sm">إجمالي الساعات (المقسوم عليه)</p>
-                            <p id="divisor-hours-result" class="text-2xl font-bold"></p>
-                        </div>
                         <div class="pt-3 mt-2 border-t-2 border-green-500 bg-green-500/10 -mx-6 px-6 py-3">
                             <p class="text-slate-300 text-sm">المعدل التراكمي (GPA)</p>
-                            <p id="gpa-result" class="text-4xl font-bold text-green-300"></p>
+                            <div class="flex items-center justify-center gap-4">
+                                <p id="gpa-result" class="text-4xl font-bold text-green-300"></p>
+                                <p id="gpa-grade" class="text-3xl font-bold text-cyan-300 px-3 py-1 bg-cyan-500/20 rounded-lg"></p>
+                            </div>
                         </div>
                      </div>
                 </div>
@@ -131,9 +130,9 @@
         const resultContainer = document.getElementById('result-container');
         const totalPointsResult = document.getElementById('total-points-result');
         const gpaResult = document.getElementById('gpa-result');
+        const gpaGrade = document.getElementById('gpa-grade');
         const errorBox = document.getElementById('error-box');
         const errorMessage = document.getElementById('error-message');
-        const divisorHoursResult = document.getElementById('divisor-hours-result');
 
         // State
         let subjectCounter = 0;
@@ -163,7 +162,7 @@
                     </div>
                     <div class="mt-2 text-left pl-1">
                          <span class="text-xs text-slate-400">النقاط الموزونة للمادة: </span>
-                         <span class="subject-result-display text-sm font-bold text-cyan-400">0.0000</span>
+                         <span class="subject-result-display text-sm font-bold text-cyan-400">0.00</span>
                     </div>
                 </div>
                 <button class="remove-subject-btn flex-shrink-0 bg-red-500 hover:bg-red-600 text-white font-bold p-2 rounded-full h-10 w-10 flex items-center justify-center transition-transform transform hover:scale-110">
@@ -172,6 +171,25 @@
             `;
             subjectsList.appendChild(subjectDiv);
             subjectDiv.querySelector('.remove-subject-btn').addEventListener('click', () => subjectDiv.remove());
+        }
+
+        /**
+         * Determines the letter grade based on the final GPA.
+         * @param {number} gpa - The final calculated GPA.
+         * @returns {string} The corresponding letter grade.
+         */
+        function getLetterGrade(gpa) {
+            if (gpa >= 3.7) return 'A+';
+            if (gpa >= 3.4) return 'A';
+            if (gpa >= 3.1) return 'A-';
+            if (gpa >= 2.8) return 'B+';
+            if (gpa >= 2.5) return 'B';
+            if (gpa >= 2.2) return 'C+';
+            if (gpa >= 1.9) return 'C';
+            if (gpa >= 1.6) return 'D+';
+            if (gpa >= 1.3) return 'D';
+            if (gpa >= 1.0) return 'D-';
+            return 'F';
         }
 
         function calculateGPA() {
@@ -213,13 +231,12 @@
                 }
 
                 if (rowIsValid) {
-                    // *** THIS IS THE CORRECTED FORMULA ***
                     const basePoints = (grade - 50) * 0.06 + 1;
                     const weightedPoints = basePoints * hours;
                     totalWeightedPoints += weightedPoints;
-                    resultDisplay.textContent = weightedPoints.toFixed(4); // Update individual result
+                    resultDisplay.textContent = weightedPoints.toFixed(2);
                 } else {
-                    resultDisplay.textContent = 'خطأ'; // Show error for this row
+                    resultDisplay.textContent = 'خطأ';
                 }
             }
 
@@ -238,10 +255,11 @@
             }
 
             const finalGPA = totalWeightedPoints / manualTotalHours;
+            const letterGrade = getLetterGrade(finalGPA);
 
-            totalPointsResult.textContent = totalWeightedPoints.toFixed(4);
-            divisorHoursResult.textContent = manualTotalHours;
-            gpaResult.textContent = finalGPA.toFixed(4);
+            totalPointsResult.textContent = totalWeightedPoints.toFixed(2);
+            gpaResult.textContent = finalGPA.toFixed(2);
+            gpaGrade.textContent = letterGrade;
             resultContainer.classList.remove('hidden');
         }
 
