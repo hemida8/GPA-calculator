@@ -1,243 +1,1030 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حاسبة المعدل التراكمي  </title>
+    <title>حاسبة المعدل التراكمي (GPA)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Cairo -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+    <!-- canvas-confetti & html2canvas -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
-        /* Custom styles and font */
         body {
             font-family: 'Cairo', sans-serif;
         }
-        /* Custom scrollbar for better aesthetics */
+
+        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
+
         ::-webkit-scrollbar-track {
-            background: #1e293b;
+            background: #0f172a;
         }
+
         ::-webkit-scrollbar-thumb {
-            background: #475569;
+            background: #334155;
             border-radius: 10px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
+            background: #475569;
         }
-        /* Style for input number fields to hide arrows */
+
+        /* Hide spin buttons */
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
+
         input[type=number] {
             -moz-appearance: textfield;
             appearance: textfield;
         }
+
+        /* Custom Glassmorphism styles */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        /* Floating animations */
+        @keyframes floatUpFade {
+            0% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.9);
+            }
+
+            10% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            90% {
+                opacity: 1;
+                transform: translateY(-10px) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.9);
+            }
+        }
+
+        .animate-float-quote {
+            animation: floatUpFade 4.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        /* Toast Notification style */
+        .toast {
+            animation: slideInUp 0.3s ease-out forwards;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white antialiased min-h-screen">
 
-    <!-- Navigation Bar -->
-    <nav class="bg-gradient-to-r from-indigo-900 via-blue-800 to-indigo-900 shadow-lg sticky top-0 z-50 backdrop-blur-sm border-b-2 border-indigo-500">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3 rtl:space-x-reverse">
-                    <div class="bg-indigo-600/20 p-2 rounded-lg backdrop-blur-sm border border-indigo-400/30">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                        </svg>
+<body
+    class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white antialiased min-h-screen pb-6 flex flex-col justify-between">
+
+    <!-- Main Wrapper to push footer to bottom -->
+    <div class="flex flex-col min-h-screen">
+        <!-- Navigation Bar -->
+        <nav class="bg-slate-900/80 shadow-xl sticky top-0 z-50 backdrop-blur-md border-b border-indigo-500/20">
+            <div class="container mx-auto px-6 py-3">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="flex items-center space-x-3 rtl:space-x-reverse">
+                        <div
+                            class="bg-gradient-to-tr from-indigo-600 to-purple-600 p-2.5 rounded-xl border border-indigo-400/30 shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h1
+                                class="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 drop-shadow-sm">
+                                محمد حميده</h1>
+                            <p class="text-slate-400 text-xs font-semibold mt-0.5">مطور تطبيقات ومؤسس تقني</p>
+                        </div>
                     </div>
-                    <div>
-                        <h1 class="text-2xl md:text-3xl font-bold text-white tracking-wide" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">محمد حميدة</h1>
-                        <p class="text-indigo-200 text">مطور تطبيقات ومؤسس تقني</p>
+                    <!-- Navigation Tabs Switcher -->
+                    <div
+                        class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 self-center sm:self-auto shadow-inner">
+                        <button id="tab-subjects-btn" onclick="switchMode('subjects')"
+                            class="text-xs md:text-sm font-bold py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md">
+                            حساب gpa الترم
+                        </button>
+                        <button id="tab-annual-btn" onclick="switchMode('annual')"
+                            class="text-xs md:text-sm font-bold py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none text-slate-400 hover:text-white">
+                            حساب gpa السنه الدراسه كامله
+
+                        </button>
                     </div>
-                </div>
-                <div class="hidden md:flex space-x-6 rtl:space-x-reverse">
                 </div>
             </div>
-        </div>
-    </nav>
+        </nav>
 
-    <!-- Prayer Modal -->
-    <div id="prayer-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div class="bg-slate-800 rounded-xl p-8 max-w-md w-full border border-blue-600/30 shadow-2xl">
-            <div class="text-center">
+        <!-- Prayer Modal -->
+        <div id="prayer-modal"
+            class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+            <div
+                class="glass-panel rounded-2xl p-8 max-w-md w-full border border-indigo-500/30 shadow-2xl text-center transform scale-100 transition-all duration-300">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-blue-300 mb-4">صلِّ على النبي ﷺ</h2>
+                    <span class="text-5xl block mb-4">✨</span>
+                    <h2 class="text-2xl font-bold text-indigo-300 mb-2">صلِّ على النبي ﷺ</h2>
+                    <p class="text-slate-400 text-sm">عطّر فمك بالصلاة على رسول الله قبل البدء</p>
                 </div>
-                <button id="prayer-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="prayer-btn"
+                    class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 focus:outline-none">
                     اللهم صلِّ وسلم وبارك على سيدنا محمد
                 </button>
             </div>
         </div>
-    </div>
 
-    <!-- Main Container -->
-    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+        <!-- Container for floating quotes -->
+        <div id="quotes-container" class="pointer-events-none fixed inset-0 z-40 overflow-hidden"></div>
 
-        <!-- Header -->
-        <header class="text-center mb-12 mt-8">
-            <div class="relative inline-block">
-                <h1 class="text-4xl md:text-5xl font-bold text-blue-200 mb-4">حاسبة المعدل التراكمي (GPA)</h1>
-            </div>
-            <div class="mt-6 max-w-2xl mx-auto">
-                <p class="text-lg text-slate-300 bg-blue-900/30 p-4 rounded-lg border border-blue-700/50">
-                    أداة متطورة لحساب المعدل التراكمي بدقة عالية
+        <!-- Main Container -->
+        <div class="container mx-auto p-4 md:p-8 max-w-4xl flex-grow">
+
+            <!-- Header -->
+            <header class="text-center mb-8 mt-6">
+                <h1
+                    class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-indigo-200 to-teal-300 mb-4 drop-shadow-md">
+                    حاسبة المعدل التراكمي (GPA)</h1>
+                <p
+                    class="text-slate-400 text-sm md:text-base max-w-lg mx-auto bg-slate-900/60 py-2.5 px-4 rounded-full border border-slate-800/80">
+                    أداة ذكية لحساب المعدل التراكمي بدقة متناهية وسهولة مطلقة
                 </p>
-            </div>
-        </header>
+            </header>
 
-        <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Container 1: Subjects Calculator Mode -->
+            <div id="subjects-calculator-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
+                <!-- Left Column: Subjects & Actions -->
+                <div class="md:col-span-2 glass-panel p-6 rounded-2xl shadow-xl">
+                    <h2
+                        class="text-xl font-bold mb-4 pb-3 text-indigo-300 border-b border-slate-700/50 flex items-center justify-between">
+                        <span>المواد الدراسية</span>
+                        <span class="text-xs font-normal text-slate-400">أدخل الدرجة وعدد الساعات</span>
+                    </h2>
 
-            <!-- Left Column: Subjects & Actions -->
-            <div class="md:col-span-2 bg-slate-800/70 p-6 rounded-xl shadow-lg border border-blue-600/30">
-                <h2 class="text-2xl font-bold mb-4 pb-3 text-blue-300 border-b-2 border-blue-600">المواد الدراسية</h2>
-                
-                <!-- Subjects List Container -->
-                <div id="subjects-list" class="space-y-4 mb-4">
-                    <!-- Subject rows will be injected here by JavaScript -->
-                </div>
-
-                <!-- Action Button -->
-                <button id="add-subject-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                    إضافة مادة جديدة
-                </button>
-            </div>
-
-            <!-- Right Column: Calculation & Result -->
-            <div class="md:col-span-1 space-y-5">
-                <!-- Calculation Formula -->
-                <div class="bg-slate-800/70 p-6 rounded-xl shadow-lg border border-blue-600/30">
-                    <h3 class="text-xl font-bold mb-3 text-blue-300">المعادلة المطبقة</h3>
-                    <div class="text-sm text-slate-300 space-y-2">
-                        <p><span class="font-bold">1. نقاط المادة الموزونة:</span><br><code class="block text-left dir-ltr bg-slate-900 p-2 rounded-md mt-1 text-cyan-300">عدد الساعات * [(الدرجة - 50) * 0.06 + 1]</code></p>
-                        <p><span class="font-bold">2. مجموع النقاط:</span><br>جمع نتائج الخطوة 1 لكل المواد.</p>
-                        <p><span class="font-bold">3. المعدل النهائي:</span><br>مجموع النقاط / إجمالي الساعات (الذي تدخله).</p>
+                    <!-- Subjects List Container -->
+                    <div id="subjects-list" class="space-y-3 mb-4">
+                        <!-- Subject rows will be injected here by JavaScript -->
                     </div>
-                </div>
 
-                <!-- Final Calculation -->
-                <div class="bg-slate-800/70 p-6 rounded-xl shadow-lg border border-green-600/30">
-                    <h3 class="text-xl font-bold mb-4 text-green-300">نتيجة ال gpa</h3>
-                    <div class="mb-4">
-                        <label for="total-hours-input" class="block mb-2 text-sm font-medium text-slate-300">إجمالي عدد الساعات للقسمة</label>
-                        <input type="number" id="total-hours-input" placeholder="اكتب مجموع عدد الساعات" class="w-full bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block p-2.5 placeholder-slate-400 transition-all duration-200">
-                    </div>
-                    <button id="calculate-gpa-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
-                        احسب المعدل
+                    <!-- Action Button -->
+                    <button id="add-subject-btn"
+                        class="w-full bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white font-bold py-3.5 px-4 rounded-xl border border-slate-700/60 hover:border-indigo-500/40 transition-all duration-200 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        إضافة مادة جديدة
                     </button>
                 </div>
 
-                <!-- Result Display -->
-                <div id="result-container" class="bg-slate-800/70 p-6 rounded-xl shadow-lg border border-green-600/30 hidden">
-                     <h3 class="text-xl font-bold mb-4 text-green-300">النتيجة النهائية</h3>
-                     <div class="space-y-3 text-center">
-                        <div>
-                            <p class="text-slate-400 text-sm">مجموع النقاط الموزونة</p>
-                            <p id="total-points-result" class="text-2xl font-bold"></p>
-                        </div>
-                        <div class="pt-3 mt-2 border-t-2 border-green-500 bg-green-500/10 -mx-6 px-6 py-3 rounded-b-lg">
-                            <p class="text-slate-300 text-sm">المعدل التراكمي (GPA)</p>
-                            <div class="flex items-center justify-center gap-4">
-                                <p id="gpa-result" class="text-4xl font-bold text-green-300"></p>
-                                <p id="gpa-grade" class="text-3xl font-bold text-cyan-300 px-3 py-1 bg-cyan-500/20 rounded-lg"></p>
+                <!-- Right Column: Calculation & Result -->
+                <div class="md:col-span-1 space-y-5">
+                    <!-- Calculation Formula -->
+                    <div class="glass-panel p-6 rounded-2xl shadow-xl">
+                        <h3 class="text-lg font-bold mb-3 text-indigo-300">المعادلة المطبقة</h3>
+                        <div class="text-xs text-slate-300 space-y-3">
+                            <div>
+                                <span class="font-bold text-slate-200 block mb-1">1. نقاط المادة الموزونة:</span>
+                                <code
+                                    class="block text-left dir-ltr bg-slate-950/80 p-2 rounded-lg text-teal-400 font-mono text-[11px] border border-slate-800">الساعات * [(الدرجة - 50) * 0.06 + 1]</code>
+                            </div>
+                            <div>
+                                <span class="font-bold text-slate-200 block mb-1">2. مجموع النقاط:</span>
+                                <p class="text-slate-400">جمع نتائج نقاط المواد الموزونة لجميع المواد.</p>
+                            </div>
+                            <div>
+                                <span class="font-bold text-slate-200 block mb-1">3. المعدل النهائي:</span>
+                                <p class="text-slate-400">مجموع النقاط / إجمالي عدد ساعات المواد.</p>
                             </div>
                         </div>
-                     </div>
-                </div>
+                    </div>
 
-                 <!-- Error Message Box -->
-                <div id="error-box" class="bg-red-500/20 border border-red-500 text-red-300 p-4 rounded-lg hidden">
-                    <p id="error-message"></p>
+                    <!-- Final Calculation -->
+                    <div class="glass-panel p-6 rounded-2xl shadow-xl border-emerald-500/10">
+                        <h3 class="text-lg font-bold mb-4 text-emerald-400 flex items-center justify-between">
+                            <span>احتساب المعدل</span>
+                            <span class="text-xs font-normal text-slate-400">تلقائي بالكامل</span>
+                        </h3>
+
+                        <!-- Auto Calculated Total Hours Info -->
+                        <div class="mb-4 bg-slate-900/50 p-3.5 rounded-xl border border-slate-800 text-center">
+                            <span class="text-slate-400 text-xs block mb-1">إجمالي عدد الساعات المحسوب</span>
+                            <span id="auto-total-hours" class="text-3xl font-black text-indigo-400">0</span>
+                            <span class="text-xs text-slate-500 block mt-1">يتم تحديثها تلقائياً عند تغيير ساعات
+                                المواد</span>
+                        </div>
+
+                        <button id="calculate-gpa-btn"
+                            class="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base shadow-md">
+                            احسب المعدل وانشئ بطاقتك 🎓
+                        </button>
+                    </div>
                 </div>
             </div>
+
+            <!-- Container 2: Annual GPA Calculator Mode (Hidden by default) -->
+            <div id="annual-calculator-container" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
+                <!-- Left Column: Term Inputs -->
+                <div class="md:col-span-2 glass-panel p-6 rounded-2xl shadow-xl space-y-4">
+                    <h2
+                        class="text-xl font-bold pb-3 text-indigo-300 border-b border-slate-700/50 flex items-center justify-between">
+                        <span>مدخلات الأترام</span>
+                        <span class="text-xs font-normal text-slate-400">أدخل المعدل التراكمي والساعات للترمين</span>
+                    </h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Term 1 -->
+                        <div class="bg-slate-800/40 border border-slate-800 rounded-xl p-4 space-y-3">
+                            <h3 class="text-sm font-bold text-slate-200 border-b border-slate-700/50 pb-2">الترم الأول
+                            </h3>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">المعدل (GPA) من 4.00</label>
+                                <input type="number" id="term1-gpa" step="0.01" min="0" max="4" placeholder="مثال: 3.50"
+                                    class="w-full bg-slate-900/80 border border-slate-800 text-white text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 block p-2.5 placeholder-slate-600 transition-all duration-200">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">عدد الساعات المسجلة</label>
+                                <input type="number" id="term1-hours" min="0" placeholder="مثال: 15"
+                                    class="w-full bg-slate-900/80 border border-slate-800 text-white text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 block p-2.5 placeholder-slate-600 transition-all duration-200">
+                            </div>
+                        </div>
+
+                        <!-- Term 2 -->
+                        <div class="bg-slate-800/40 border border-slate-800 rounded-xl p-4 space-y-3">
+                            <h3 class="text-sm font-bold text-slate-200 border-b border-slate-700/50 pb-2">الترم الثاني
+                            </h3>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">المعدل (GPA) من 4.00</label>
+                                <input type="number" id="term2-gpa" step="0.01" min="0" max="4" placeholder="مثال: 3.80"
+                                    class="w-full bg-slate-900/80 border border-slate-800 text-white text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 block p-2.5 placeholder-slate-600 transition-all duration-200">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">عدد الساعات المسجلة</label>
+                                <input type="number" id="term2-hours" min="0" placeholder="مثال: 18"
+                                    class="w-full bg-slate-900/80 border border-slate-800 text-white text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 block p-2.5 placeholder-slate-600 transition-all duration-200">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Formula & Action -->
+                <div class="md:col-span-1 space-y-5">
+                    <!-- Formula -->
+                    <div class="glass-panel p-6 rounded-2xl shadow-xl">
+                        <h3 class="text-lg font-bold mb-3 text-indigo-300">المعادلة المطبقة</h3>
+                        <div class="text-xs text-slate-300 space-y-3">
+                            <div>
+                                <span class="font-bold text-slate-200 block mb-1">حساب معدل السنة:</span>
+                                <code
+                                    class="block text-left dir-ltr bg-slate-950/80 p-2 rounded-lg text-teal-400 font-mono text-[11px] border border-slate-800">((GPA1 * H1) + (GPA2 * H2)) / (H1 + H2)</code>
+                            </div>
+                            <p class="text-slate-400 text-[10px]">يقوم بضرب معدل كل ترم في عدد ساعاته لإنتاج النقاط
+                                الكلية، ثم يقسمها على إجمالي ساعات الترمين.</p>
+                        </div>
+                    </div>
+
+                    <!-- Action Button -->
+                    <div class="glass-panel p-6 rounded-2xl shadow-xl border-emerald-500/10">
+                        <button id="calculate-annual-gpa-btn"
+                            class="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base shadow-md">
+                            احسب معدل السنة وانشئ بطاقتك 🎓
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message Box -->
+            <div id="error-box"
+                class="bg-red-500/10 border border-red-500/30 text-red-300 p-4 rounded-xl hidden text-sm text-center mt-6">
+                <p id="error-message"></p>
+            </div>
+
         </div>
     </div>
+
+    <!-- GPA Success Card Modal -->
+    <div id="gpa-modal"
+        class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 overflow-y-auto flex justify-center items-center p-3 md:p-4 hidden">
+        <!-- Modal Container (my-auto ensures centered or scrollable layout dynamically) -->
+        <div
+            class="bg-slate-900/90 border border-slate-800 rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl transform scale-95 transition-all duration-300 my-auto">
+
+            <!-- Modal Header -->
+            <div class="px-6 py-3 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="text-base font-bold text-slate-200">بطاقة التفوق والنجاح</h3>
+                <button id="close-modal-x" class="text-slate-400 hover:text-white text-xl focus:outline-none">
+                    &times;
+                </button>
+            </div>
+
+            <!-- The Card (Target for html2canvas) -->
+            <div class="px-5 py-4 flex justify-center">
+                <!-- Wrapper for card to ensure clean capture size and aspect ratio -->
+                <div id="gpa-card-wrapper" class="p-1.5 bg-slate-950 rounded-2xl w-full max-w-[310px]">
+                    <div id="gpa-card"
+                        class="relative overflow-hidden rounded-xl p-5 text-center select-none mx-auto border-2 border-cyan-500/40 text-slate-100 animate-fade-in"
+                        style="width: 100%; min-height: 400px; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(135deg, #020617 0%, #0b0f19 50%, #020617 100%);">
+
+                        <!-- Ornament Container (for special decorations in styles) -->
+                        <div id="card-ornament" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+
+                        <!-- Glow Circles -->
+                        <div
+                            class="absolute -top-16 -left-16 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none">
+                        </div>
+                        <div
+                            class="absolute -bottom-16 -right-16 w-32 h-32 bg-teal-500/10 rounded-full blur-2xl pointer-events-none">
+                        </div>
+
+                        <!-- Card Header -->
+                        <div class="flex justify-between items-center mb-3 relative z-10">
+                            <div id="card-badge"
+                                class="bg-cyan-500/20 px-2.5 py-0.5 rounded-full text-[10px] text-cyan-300 font-bold border border-cyan-500/30">
+                                بطاقة تفوق تقنية 🎓
+                            </div>
+                            <div class="text-[10px] text-slate-500 font-mono" id="card-date">
+                                2026/06/24
+                            </div>
+                        </div>
+
+                        <!-- Success Trophy Badge -->
+                        <div class="flex justify-center mb-3 relative z-10">
+                            <div
+                                class="w-14 h-14 rounded-full bg-gradient-to-tr from-yellow-400 to-amber-500 p-0.5 shadow-lg shadow-amber-500/10 flex items-center justify-center">
+                                <div id="card-icon-container"
+                                    class="w-full h-full rounded-full bg-slate-950 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-cyan-400"
+                                        viewBox="0 0 20 20" fill="currentColor">
+                                        <path
+                                            d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Name Display (ContentEditable for direct editing) -->
+                        <div class="mb-2 relative z-10">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <h4 id="card-student-name" contenteditable="true" dir="auto"
+                                    class="text-base font-bold text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded px-2 min-w-[140px] border-b border-dashed border-slate-700 hover:border-indigo-400 transition-colors"
+                                    title="اضغط لتعديل الاسم مباشرة">
+                                    صاحب الهمّة والتميّز 🌟
+                                </h4>
+                                <button id="edit-name-btn"
+                                    onclick="document.getElementById('card-student-name').focus()"
+                                    class="text-slate-500 hover:text-indigo-400 transition-colors"
+                                    title="اضغط لتعديل الاسم">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <p id="edit-name-hint" class="text-[9px] text-slate-500 mt-1">اضغط على الاسم لتعديله كما تحب
+                            </p>
+
+                            <!-- Academic Year Selector Row (Shown inside Card only in Annual mode) -->
+                            <div id="card-year-container"
+                                class="mt-1.5 flex items-center justify-center gap-1 relative z-10 hidden">
+                                <span id="card-year-label" class="text-[10px] text-slate-500">السنة الدراسية:</span>
+                                <div class="flex items-center gap-1">
+                                    <select id="card-year-select"
+                                        class="bg-transparent border-b border-dashed border-slate-700 hover:border-indigo-400 text-[10px] font-bold text-slate-200 focus:outline-none cursor-pointer appearance-none px-1">
+                                        <option value="السنة الأولى" class="bg-slate-950 text-slate-200">السنة الأولى
+                                        </option>
+                                        <option value="السنة الثانية" class="bg-slate-950 text-slate-200" selected>السنة
+                                            الثانية</option>
+                                        <option value="السنة الثالثة" class="bg-slate-950 text-slate-200">السنة الثالثة
+                                        </option>
+                                        <option value="السنة الرابعة" class="bg-slate-950 text-slate-200">السنة الرابعة
+                                        </option>
+                                        <option value="السنة الخامسة" class="bg-slate-950 text-slate-200">السنة الخامسة
+                                        </option>
+                                        <option value="السنة السادسة" class="bg-slate-950 text-slate-200">السنة السادسة
+                                        </option>
+                                    </select>
+                                    <svg id="card-year-select-arrow" xmlns="http://www.w3.org/2000/svg"
+                                        class="h-3 w-3 text-slate-500" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- GPA Section -->
+                        <div class="bg-slate-900/60 border border-slate-900 rounded-xl p-3 my-1.5 relative z-10">
+                            <p class="text-slate-500 text-[10px] mb-0.5">المعدل التراكمي (GPA)</p>
+                            <div class="flex items-baseline justify-center gap-0.5">
+                                <span id="card-gpa-val" class="text-4xl font-extrabold text-cyan-400">4.00</span>
+                                <span class="text-slate-600 text-sm">/ 4.00</span>
+                            </div>
+                        </div>
+
+                        <!-- Info Stats Grid -->
+                        <div class="grid grid-cols-2 gap-2 my-1 relative z-10">
+                            <div class="bg-slate-900/30 border border-slate-900 rounded-lg p-2">
+                                <p class="text-[9px] text-slate-500 mb-0.5">التقدير العام</p>
+                                <p id="card-grade-val" class="text-xs font-bold text-cyan-400">امتياز مرتفع</p>
+                            </div>
+                            <div class="bg-slate-900/30 border border-slate-900 rounded-lg p-2">
+                                <p class="text-[9px] text-slate-500 mb-0.5">الساعات المسجلة</p>
+                                <p id="card-hours-val" class="text-xs font-bold text-indigo-400">0 ساعة</p>
+                            </div>
+                        </div>
+
+                        <!-- Card Academic Signature Footer with Developer Credentials -->
+                        <div
+                            class="mt-3 pt-2.5 border-t border-slate-900/80 flex items-center justify-between text-right relative z-10">
+                            <div>
+                                <span class="text-[8px] text-slate-500 block">تصميم وبرمجة:</span>
+                                <span id="card-dev-name" class="font-bold text-indigo-400 text-[10px] block">محمد
+                                    حميده</span>
+                                <span id="card-dev-title" class="text-[8px] text-slate-500 block">مطور تطبيقات ومؤسس
+                                    تقني</span>
+                            </div>
+                            <div class="text-left">
+                                <span class="text-[8px] text-slate-600 block">حاسبة المعدل التراكمي</span>
+                                <span class="text-[9px] text-slate-500 block font-mono">GPA Calculator</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Style Selector Panel -->
+            <div class="px-6 py-2">
+                <label class="block text-[11px] font-semibold text-slate-400 mb-2">اختر تصميم ولون البطاقة:</label>
+                <div class="flex gap-3 justify-center items-center">
+
+                    <!-- Classic style button -->
+                    <button onclick="applyCardStyle('classic')"
+                        class="relative w-11 h-11 rounded-xl overflow-hidden border border-slate-700 hover:border-cyan-400 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        title="كلاسيكي تقني">
+                        <div class="w-full h-full flex flex-wrap">
+                            <div class="w-1/2 h-full bg-[#020617]"></div>
+                            <div class="w-1/2 h-full bg-[#0f172a] border-l border-cyan-500/20"></div>
+                        </div>
+                        <span class="absolute inset-0 flex items-center justify-center text-xs">🎓</span>
+                    </button>
+
+                    <!-- Girly style button -->
+                    <button onclick="applyCardStyle('girly')"
+                        class="relative w-11 h-11 rounded-xl overflow-hidden border border-slate-700 hover:border-rose-400 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                        title="بناتي وردي">
+                        <div class="w-full h-full flex flex-wrap">
+                            <div class="w-1/2 h-full bg-[#fdf2f8]"></div>
+                            <div class="w-1/2 h-full bg-[#fbcfe8] border-l border-pink-300"></div>
+                        </div>
+                        <span class="absolute inset-0 flex items-center justify-center text-xs">🎀</span>
+                    </button>
+
+                    <!-- Royal Gold style button -->
+                    <button onclick="applyCardStyle('royal')"
+                        class="relative w-11 h-11 rounded-xl overflow-hidden border border-slate-700 hover:border-amber-400 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        title="ملكـي زمردي">
+                        <div class="w-full h-full flex flex-wrap">
+                            <div class="w-1/2 h-full bg-[#022c22]"></div>
+                            <div class="w-1/2 h-full bg-[#064e3b] border-l border-amber-500/20"></div>
+                        </div>
+                        <span class="absolute inset-0 flex items-center justify-center text-xs">👑</span>
+                    </button>
+
+                    <!-- Vibrant Neon style button -->
+                    <button onclick="applyCardStyle('vibrant')"
+                        class="relative w-11 h-11 rounded-xl overflow-hidden border border-slate-700 hover:border-orange-400 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        title="حفلة شروق">
+                        <div class="w-full h-full flex flex-wrap">
+                            <div class="w-1/2 h-full bg-[#ff7e5f]"></div>
+                            <div class="w-1/2 h-full bg-[#feb47b] border-l border-white/20"></div>
+                        </div>
+                        <span class="absolute inset-0 flex items-center justify-center text-xs">🎉</span>
+                    </button>
+
+                </div>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="p-6 border-t border-slate-800 bg-slate-950 flex flex-col gap-2.5">
+                <button id="save-img-btn"
+                    class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    حفظ كصورة
+                </button>
+                <button id="close-modal-btn"
+                    class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-3 px-4 rounded-xl transition-all duration-200 border border-slate-700/50">
+                    إغلاق
+                </button>
+                <div class="text-center text-[10px] text-slate-500 mt-1">
+                    تصميم وتطوير: محمد حميده - مطور تطبيقات ومؤسس تقني
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Dynamic Toast Notification Container -->
+    <div id="toast-container"
+        class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 z-50 flex flex-col gap-2 max-w-sm pointer-events-none">
+    </div>
+
+    <!-- Page Footer with Developer Credit -->
+    <footer class="text-center mt-12 py-6 border-t border-slate-800/40 text-slate-500">
+        <p class="text-xs">تم التطوير وتصميم الصفحة بواسطة</p>
+        <p class="text-sm font-bold text-indigo-400 mt-1">محمد حميده</p>
+        <p class="text-xs text-indigo-500/80">مطور تطبيقات ومؤسس تقني</p>
+    </footer>
 
     <script>
         // DOM Elements
         const subjectsList = document.getElementById('subjects-list');
         const addSubjectBtn = document.getElementById('add-subject-btn');
         const calculateGpaBtn = document.getElementById('calculate-gpa-btn');
-        const totalHoursInput = document.getElementById('total-hours-input');
-        const resultContainer = document.getElementById('result-container');
-        const totalPointsResult = document.getElementById('total-points-result');
-        const gpaResult = document.getElementById('gpa-result');
-        const gpaGrade = document.getElementById('gpa-grade');
+        const autoTotalHours = document.getElementById('auto-total-hours');
         const errorBox = document.getElementById('error-box');
         const errorMessage = document.getElementById('error-message');
 
+        // Modal Elements
+        const gpaModal = document.getElementById('gpa-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const closeModalX = document.getElementById('close-modal-x');
+
+        // Card display elements inside modal
+        const cardStudentName = document.getElementById('card-student-name');
+        const cardGpaVal = document.getElementById('card-gpa-val');
+        const cardGradeVal = document.getElementById('card-grade-val');
+        const cardHoursVal = document.getElementById('card-hours-val');
+        const cardDate = document.getElementById('card-date');
+        const cardBadge = document.getElementById('card-badge');
+        const cardIconContainer = document.getElementById('card-icon-container');
+        const cardDevName = document.getElementById('card-dev-name');
+        const cardDevTitle = document.getElementById('card-dev-title');
+
+        // Modal Actions
+        const saveImgBtn = document.getElementById('save-img-btn');
+
         // State
         let subjectCounter = 0;
+        let currentStyle = 'classic';
+        let activeMode = 'subjects';
 
+        // Page mode switcher (Subjects vs Annual)
+        window.switchMode = function (mode) {
+            activeMode = mode;
+            hideError();
+
+            const subjectsTab = document.getElementById('tab-subjects-btn');
+            const annualTab = document.getElementById('tab-annual-btn');
+            const subjectsContainer = document.getElementById('subjects-calculator-container');
+            const annualContainer = document.getElementById('annual-calculator-container');
+            const cardYearContainer = document.getElementById('card-year-container');
+
+            if (mode === 'subjects') {
+                // Tab buttons styling
+                subjectsTab.className = "text-xs md:text-sm font-bold py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md";
+                annualTab.className = "text-xs md:text-sm font-bold py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none text-slate-400 hover:text-white";
+
+                // Show/Hide calculators
+                subjectsContainer.classList.remove('hidden');
+                annualContainer.classList.add('hidden');
+                cardYearContainer.classList.add('hidden');
+            } else {
+                // Tab buttons styling
+                annualTab.className = "text-xs md:text-sm font-bold py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md";
+                subjectsTab.className = "text-xs md:text-sm font-bold py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none text-slate-400 hover:text-white";
+
+                // Show/Hide calculators
+                subjectsContainer.classList.add('hidden');
+                annualContainer.classList.remove('hidden');
+                cardYearContainer.classList.remove('hidden');
+            }
+        };
+
+        // Card Styles definition for dynamic changes
+        const cardStyles = {
+            classic: {
+                bg: 'linear-gradient(135deg, #020617 0%, #0f172a 50%, #030712 100%)',
+                border: 'border-2 border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.15)]',
+                gpaBg: 'bg-slate-900/60 border border-slate-800',
+                gpaColor: 'text-cyan-400 font-extrabold',
+                badgeClass: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+                badgeText: 'بطاقة تفوق تقنية 🎓',
+                accentColor: 'text-indigo-400',
+                titleColor: 'text-slate-500',
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-cyan-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                </svg>`,
+                ornament: '',
+                textColor: 'text-slate-100',
+                cardFooterBg: 'border-t border-slate-900/80',
+                glowStart: 'bg-indigo-500/10',
+                glowEnd: 'bg-teal-500/10'
+            },
+            girly: {
+                bg: 'linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fbcfe8 100%)',
+                border: 'border-4 border-double border-pink-400 shadow-[0_0_20px_rgba(244,63,94,0.15)]',
+                gpaBg: 'bg-white/80 border border-pink-200/60 shadow-sm',
+                gpaColor: 'text-pink-600 font-black',
+                badgeClass: 'bg-pink-100 text-pink-600 border-pink-200',
+                badgeText: 'بطاقة تميز وأناقة 🎀',
+                accentColor: 'text-pink-600',
+                titleColor: 'text-pink-500',
+                icon: `<span class="text-3xl select-none">🎀</span>`,
+                ornament: '<div class="absolute top-2 left-2 text-xl opacity-40 select-none">💖</div><div class="absolute bottom-2 right-2 text-xl opacity-40 select-none">💖</div>',
+                textColor: 'text-pink-950',
+                cardFooterBg: 'border-t border-pink-200/80',
+                glowStart: '',
+                glowEnd: ''
+            },
+            royal: {
+                bg: 'linear-gradient(135deg, #064e3b 0%, #022c22 50%, #064e3b 100%)',
+                border: 'border-4 border-amber-500/80 shadow-[0_0_25px_rgba(234,179,8,0.2)]',
+                gpaBg: 'bg-black/40 border border-amber-500/20',
+                gpaColor: 'text-amber-400 font-black',
+                badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+                badgeText: 'وسام الشرف الملكي 👑',
+                accentColor: 'text-amber-400',
+                titleColor: 'text-amber-500',
+                icon: `<span class="text-3xl select-none">👑</span>`,
+                ornament: '<div class="absolute -top-10 -right-10 w-24 h-24 border border-amber-500/10 rounded-full select-none pointer-events-none"></div>',
+                textColor: 'text-slate-100',
+                cardFooterBg: 'border-t border-amber-500/20',
+                glowStart: 'bg-amber-500/10',
+                glowEnd: 'bg-yellow-500/10'
+            },
+            vibrant: {
+                bg: 'linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)',
+                border: 'border-2 border-white/60 shadow-[0_10px_20px_rgba(255,126,95,0.3)]',
+                gpaBg: 'bg-white/20 border border-white/30 backdrop-blur-sm',
+                gpaColor: 'text-slate-900 font-extrabold',
+                badgeClass: 'bg-white/30 text-slate-950 border-white/40',
+                badgeText: 'درع التميز والنجاح ✨',
+                accentColor: 'text-slate-900',
+                titleColor: 'text-slate-800',
+                icon: `<span class="text-3xl select-none">🎉</span>`,
+                ornament: '<div class="absolute top-4 right-4 text-sm opacity-40 select-none">✨</div><div class="absolute bottom-4 left-4 text-sm opacity-40 select-none">✨</div>',
+                textColor: 'text-slate-950',
+                cardFooterBg: 'border-t border-white/20',
+                glowStart: '',
+                glowEnd: ''
+            }
+        };
+
+        // Function to apply card styles
+        window.applyCardStyle = function (styleKey) {
+            const config = cardStyles[styleKey];
+            if (!config) return;
+
+            currentStyle = styleKey;
+            const card = document.getElementById('gpa-card');
+
+            // Apply background gradient and custom border/classes
+            card.style.background = config.bg;
+            card.className = `relative overflow-hidden rounded-xl p-5 text-center select-none mx-auto ${config.border} ${config.textColor}`;
+
+            // Apply badge styles
+            cardBadge.className = `${config.badgeClass} px-2.5 py-0.5 rounded-full text-[10px] font-bold border`;
+            cardBadge.textContent = config.badgeText;
+
+            // Apply icon
+            cardIconContainer.innerHTML = config.icon;
+
+            // Apply Ornaments (decorations)
+            let ornamentContainer = document.getElementById('card-ornament');
+            if (!ornamentContainer) {
+                ornamentContainer = document.createElement('div');
+                ornamentContainer.id = 'card-ornament';
+                ornamentContainer.className = 'absolute inset-0 pointer-events-none overflow-hidden';
+                card.appendChild(ornamentContainer);
+            }
+            ornamentContainer.innerHTML = config.ornament;
+
+            // Apply GPA box styling and color
+            const gpaBox = cardGpaVal.closest('.bg-slate-900\\/60, .bg-white\\/80, .bg-black\\/40, .bg-white\\/20');
+            if (gpaBox) {
+                gpaBox.className = `rounded-xl p-3 my-1.5 ${config.gpaBg}`;
+            }
+            cardGpaVal.className = `text-4xl font-extrabold ${config.gpaColor}`;
+
+            // Apply stats box styling and text colors
+            const statsBoxes = card.querySelectorAll('.grid.grid-cols-2 > div');
+            statsBoxes.forEach(box => {
+                if (styleKey === 'girly') {
+                    box.className = 'bg-white/60 border border-pink-200 rounded-lg p-2';
+                } else if (styleKey === 'royal') {
+                    box.className = 'bg-black/30 border border-amber-500/10 rounded-lg p-2';
+                } else if (styleKey === 'vibrant') {
+                    box.className = 'bg-white/30 border border-white/20 rounded-lg p-2';
+                } else {
+                    box.className = 'bg-slate-900/30 border border-slate-900 rounded-lg p-2';
+                }
+            });
+
+            cardGradeVal.className = `text-xs font-bold ${config.gpaColor}`;
+            cardHoursVal.className = `text-xs font-bold ${config.accentColor}`;
+
+            // Apply editable name text colors
+            cardStudentName.className = `text-base font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded px-2 min-w-[140px] border-b border-dashed border-slate-700 hover:border-indigo-400 transition-colors ${styleKey === 'girly' || styleKey === 'vibrant' ? 'text-slate-900' : 'text-slate-100'}`;
+
+            // Apply card sub-title colors
+            const nameSub = cardStudentName.nextElementSibling;
+            if (nameSub) {
+                nameSub.className = `text-[9px] mt-1 ${config.titleColor}`;
+            }
+
+            // Apply academic year selector matching colors
+            const yearSelect = document.getElementById('card-year-select');
+            const yearLabel = document.getElementById('card-year-label');
+            const yearArrow = document.getElementById('card-year-select-arrow');
+
+            if (yearSelect && yearLabel) {
+                if (styleKey === 'girly') {
+                    yearSelect.className = "bg-transparent border-b border-dashed border-pink-300 hover:border-pink-500 text-[10px] font-bold text-pink-600 focus:outline-none cursor-pointer appearance-none px-1";
+                    yearLabel.className = "text-[10px] text-pink-400";
+                    if (yearArrow) yearArrow.className = "h-3 w-3 text-pink-500";
+                } else if (styleKey === 'royal') {
+                    yearSelect.className = "bg-transparent border-b border-dashed border-amber-500/20 hover:border-amber-400 text-[10px] font-bold text-amber-400 focus:outline-none cursor-pointer appearance-none px-1";
+                    yearLabel.className = "text-[10px] text-amber-500";
+                    if (yearArrow) yearArrow.className = "h-3 w-3 text-amber-500";
+                } else if (styleKey === 'vibrant') {
+                    yearSelect.className = "bg-transparent border-b border-dashed border-slate-700 hover:border-slate-900 text-[10px] font-bold text-slate-900 focus:outline-none cursor-pointer appearance-none px-1";
+                    yearLabel.className = "text-[10px] text-slate-850";
+                    if (yearArrow) yearArrow.className = "h-3 w-3 text-slate-800";
+                } else {
+                    yearSelect.className = "bg-transparent border-b border-dashed border-slate-700 hover:border-indigo-400 text-[10px] font-bold text-slate-200 focus:outline-none cursor-pointer appearance-none px-1";
+                    yearLabel.className = "text-[10px] text-slate-500";
+                    if (yearArrow) yearArrow.className = "h-3 w-3 text-slate-500";
+                }
+            }
+
+            // Apply developer credentials colors
+            cardDevName.className = `font-bold ${config.accentColor} text-[10px] block`;
+            cardDevTitle.className = `text-[8px] ${config.titleColor} block`;
+
+            // Apply footer border class
+            const cardFooter = cardDevName.closest('.border-t');
+            if (cardFooter) {
+                cardFooter.className = `mt-3 pt-2.5 flex items-center justify-between text-right ${config.cardFooterBg}`;
+            }
+
+            // Apply glow circles classes (only visible in dark styles)
+            const glows = card.querySelectorAll('.absolute.rounded-full.blur-2xl');
+            if (glows.length >= 2) {
+                if (styleKey === 'girly' || styleKey === 'vibrant') {
+                    glows[0].style.display = 'none';
+                    glows[1].style.display = 'none';
+                } else {
+                    glows[0].style.display = 'block';
+                    glows[1].style.display = 'block';
+                    glows[0].className = `absolute -top-16 -left-16 w-32 h-32 ${config.glowStart} rounded-full blur-2xl pointer-events-none`;
+                    glows[1].className = `absolute -bottom-16 -right-16 w-32 h-32 ${config.glowEnd} rounded-full blur-2xl pointer-events-none`;
+                }
+            }
+        };
+
+        // Select all text inside contenteditable on focus to allow instant delete/edit
+        cardStudentName.addEventListener('focus', () => {
+            const range = document.createRange();
+            range.selectNodeContents(cardStudentName);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        });
+
+        // Display current date on card
+        const dateOptions = { year: 'numeric', month: 'numeric', day: 'numeric' };
+        cardDate.textContent = new Date().toLocaleDateString('ar-EG', dateOptions);
+
+        // Toast Helper
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast pointer-events-auto p-4 rounded-xl shadow-xl border flex items-center justify-between text-sm ${type === 'success' ? 'bg-emerald-900/90 border-emerald-500/30 text-emerald-200' : 'bg-slate-900/90 border-slate-700 text-slate-200'
+                }`;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button class="text-xs mr-3 text-slate-400 hover:text-white">&times;</button>
+            `;
+            toast.querySelector('button').addEventListener('click', () => toast.remove());
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Show/Hide error helper
         function showError(message) {
             errorMessage.textContent = message;
             errorBox.classList.remove('hidden');
-            resultContainer.classList.add('hidden');
         }
 
         function hideError() {
             errorBox.classList.add('hidden');
         }
 
+        // Real-time calculation of total hours
+        function calculateTotalHours() {
+            let total = 0;
+            const hourInputs = subjectsList.querySelectorAll('.subject-hours');
+            hourInputs.forEach(input => {
+                const val = parseFloat(input.value);
+                if (!isNaN(val) && val > 0) {
+                    total += val;
+                }
+            });
+            autoTotalHours.textContent = total;
+            return total;
+        }
+
+        // Add a new subject row
         function addSubject() {
             subjectCounter++;
             const subjectId = `subject-${Date.now()}`;
             const subjectDiv = document.createElement('div');
             subjectDiv.id = subjectId;
-            subjectDiv.className = 'flex items-center gap-4 p-3 bg-slate-700 rounded-lg';
+            subjectDiv.className = 'flex items-center gap-3 p-3 bg-slate-800/50 hover:bg-slate-800/80 border border-slate-700/40 rounded-xl transition-all duration-150';
             subjectDiv.innerHTML = `
                 <div class="flex-grow">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <input type="text" placeholder="اسم المادة (اختياري)" class="subject-name w-full bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block p-2.5 placeholder-slate-400 transition-all duration-200">
-                        <input type="number" placeholder="الدرجة من 100" class="subject-grade w-full bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block p-2.5 placeholder-slate-400 transition-all duration-200">
-                        <input type="number" placeholder="عدد الساعات" class="subject-hours w-full bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block p-2.5 placeholder-slate-400 transition-all duration-200">
+                        <input type="text" placeholder="اسم المادة (اختياري)" class="subject-name w-full bg-slate-900/80 border border-slate-800 text-white text-xs md:text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 block p-2.5 placeholder-slate-600 transition-all duration-200">
+                        <input type="number" placeholder="الدرجة من 100" class="subject-grade w-full bg-slate-900/80 border border-slate-800 text-white text-xs md:text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 block p-2.5 placeholder-slate-600 transition-all duration-200">
+                        <input type="number" placeholder="عدد الساعات" class="subject-hours w-full bg-slate-900/80 border border-slate-800 text-white text-xs md:text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 block p-2.5 placeholder-slate-600 transition-all duration-200">
                     </div>
-                    <div class="mt-2 text-left pl-1">
-                         <span class="text-xs text-slate-400">النقاط الموزونة للمادة: </span>
-                         <span class="subject-result-display text-sm font-bold text-cyan-300">0.00</span>
+                    <div class="mt-2 text-left pl-1 flex justify-between items-center">
+                         <span class="text-[10px] text-slate-500">حاسبة الساعات التلقائية</span>
+                         <div>
+                             <span class="text-[10px] text-slate-500">النقاط الموزونة: </span>
+                             <span class="subject-result-display text-xs font-bold text-teal-400">0.00</span>
+                         </div>
                     </div>
                 </div>
-                <button class="remove-subject-btn flex-shrink-0 bg-red-500 hover:bg-red-600 text-white font-bold p-2 rounded-full h-10 w-10 flex items-center justify-center transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                <button class="remove-subject-btn flex-shrink-0 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold p-2.5 rounded-xl transition-all duration-150 border border-red-500/20 active:scale-95 focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
                 </button>
             `;
             subjectsList.appendChild(subjectDiv);
-            subjectDiv.querySelector('.remove-subject-btn').addEventListener('click', () => subjectDiv.remove());
+
+            // Add listeners for total hours updates in real-time
+            const hoursInput = subjectDiv.querySelector('.subject-hours');
+            hoursInput.addEventListener('input', calculateTotalHours);
+
+            // Remove button event listener
+            const removeBtn = subjectDiv.querySelector('.remove-subject-btn');
+            removeBtn.addEventListener('click', () => {
+                subjectDiv.remove();
+                calculateTotalHours();
+            });
         }
 
-        /**
-         * Determines the letter grade based on the final GPA.
-         * @param {number} gpa - The final calculated GPA.
-         * @returns {string} The corresponding letter grade.
-         */
-        function getLetterGrade(gpa) {
-            if (gpa >= 3.7) return 'A+';
-            if (gpa >= 3.4) return 'A';
-            if (gpa >= 3.1) return 'A-';
-            if (gpa >= 2.8) return 'B+';
-            if (gpa >= 2.5) return 'B';
-            if (gpa >= 2.2) return 'C+';
-            if (gpa >= 1.9) return 'C';
-            if (gpa >= 1.6) return 'D+';
-            if (gpa >= 1.3) return 'D';
-            if (gpa >= 1.0) return 'D-';
-            return 'F';
+        // Determines the letter grade and English/Arabic details
+        function getGradeDetails(gpa) {
+            if (gpa >= 3.7) return { letter: 'A+', arabic: 'امتياز مرتفع' };
+            if (gpa >= 3.4) return { letter: 'A', arabic: 'امتياز' };
+            if (gpa >= 3.1) return { letter: 'A-', arabic: 'امتياز فرعي' };
+            if (gpa >= 2.8) return { letter: 'B+', arabic: 'جيد جداً مرتفع' };
+            if (gpa >= 2.5) return { letter: 'B', arabic: 'جيد جداً' };
+            if (gpa >= 2.2) return { letter: 'C+', arabic: 'جيد مرتفع' };
+            if (gpa >= 1.9) return { letter: 'C', arabic: 'جيد' };
+            if (gpa >= 1.6) return { letter: 'D+', arabic: 'مقبول مرتفع' };
+            if (gpa >= 1.3) return { letter: 'D', arabic: 'مقبول' };
+            if (gpa >= 1.0) return { letter: 'D-', arabic: 'مقبول ضعيف' };
+            return { letter: 'F', arabic: 'راسب' };
         }
 
+        // Confetti Celebration
+        function triggerCelebration() {
+            // Left confetti gun
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { x: 0.05, y: 0.75 },
+                colors: ['#6366f1', '#10b981', '#fbbf24', '#f43f5e', '#22c55e']
+            });
+            // Right confetti gun
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { x: 0.95, y: 0.75 },
+                colors: ['#6366f1', '#10b981', '#fbbf24', '#f43f5e', '#22c55e']
+            });
+        }
+
+        // Floating Motivational Quotes
+        function showFloatingQuotes() {
+            const quotes = [
+                "ألف مبروك النجاح! القادم أفضل بإذن الله 🌟",
+                "لكل مجتهد نصيب، فخورون بك! 💪",
+                "النجاح ليس نهاية المطاف، بل بداية رحلة عظيمة 🚀",
+                "أحسنت صنعاً! استمر في السعي نحو القمة ✨",
+                "طموحك لا حدود له، نجاح مبارك! 🎉",
+                "بالعلم ترتقي الأمم، هنيئاً لك هذا الإنجاز 🎓"
+            ];
+
+            const container = document.getElementById('quotes-container');
+            if (!container) return;
+
+            // Choose 3 unique random quotes
+            const shuffled = [...quotes].sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, 3);
+
+            selected.forEach((quote, index) => {
+                const quoteEl = document.createElement('div');
+                quoteEl.className = 'fixed z-50 bg-slate-900/90 border border-slate-700/65 px-4.5 py-2.5 rounded-2xl text-xs md:text-sm font-bold text-indigo-200 shadow-xl pointer-events-none animate-float-quote';
+
+                // Distribute side positioning to avoid overlapping
+                const side = index % 2 === 0 ? 'left' : 'right';
+                const horizontalPercent = Math.random() * 10 + 5; // 5% to 15% from side
+                const verticalPercent = 20 + (index * 25) + Math.random() * 10; // spaced vertically
+
+                if (side === 'left') {
+                    quoteEl.style.left = `${horizontalPercent}%`;
+                } else {
+                    quoteEl.style.right = `${horizontalPercent}%`;
+                }
+                quoteEl.style.top = `${verticalPercent}%`;
+                quoteEl.innerText = quote;
+
+                container.appendChild(quoteEl);
+
+                // Remove element after animation finishes
+                setTimeout(() => {
+                    quoteEl.remove();
+                }, 4500);
+            });
+        }
+
+        // Modal opening and closing logic
+        function openModal() {
+            gpaModal.classList.remove('hidden');
+            gpaModal.classList.add('flex');
+
+            // Apply default style reset just in case
+            applyCardStyle(currentStyle);
+
+            // Animate scale up
+            setTimeout(() => {
+                gpaModal.querySelector('.transform').classList.remove('scale-95');
+                gpaModal.querySelector('.transform').classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            gpaModal.querySelector('.transform').classList.remove('scale-100');
+            gpaModal.querySelector('.transform').classList.add('scale-95');
+            setTimeout(() => {
+                gpaModal.classList.add('hidden');
+                gpaModal.classList.remove('flex');
+            }, 200);
+        }
+
+        // Main calculation logic for Subjects GPA
         function calculateGPA() {
             hideError();
             let totalWeightedPoints = 0;
             let isValid = true;
-            const subjectRows = subjectsList.querySelectorAll('.flex.items-center.gap-4');
-            
+            const subjectRows = subjectsList.querySelectorAll('.flex.items-center.gap-3');
+
             if (subjectRows.length === 0) {
                 showError('الرجاء إضافة مادة واحدة على الأقل.');
                 return;
@@ -247,12 +1034,12 @@
                 const gradeInput = row.querySelector('.subject-grade');
                 const hoursInput = row.querySelector('.subject-hours');
                 const resultDisplay = row.querySelector('.subject-result-display');
-                
+
                 const grade = parseFloat(gradeInput.value);
                 const hours = parseFloat(hoursInput.value);
 
-                gradeInput.classList.remove('border-red-500', 'border-slate-500');
-                hoursInput.classList.remove('border-red-500', 'border-slate-500');
+                gradeInput.classList.remove('border-red-500', 'border-slate-800');
+                hoursInput.classList.remove('border-red-500', 'border-slate-800');
 
                 let rowIsValid = true;
                 if (isNaN(grade) || grade < 0 || grade > 100) {
@@ -260,14 +1047,14 @@
                     isValid = false;
                     rowIsValid = false;
                 } else {
-                    gradeInput.classList.add('border-slate-500');
+                    gradeInput.classList.add('border-slate-800');
                 }
                 if (isNaN(hours) || hours <= 0) {
                     hoursInput.classList.add('border-red-500');
                     isValid = false;
                     rowIsValid = false;
                 } else {
-                    hoursInput.classList.add('border-slate-500');
+                    hoursInput.classList.add('border-slate-800');
                 }
 
                 if (rowIsValid) {
@@ -281,53 +1068,213 @@
             }
 
             if (!isValid) {
-                showError('الرجاء إدخال قيم صحيحة لجميع الحقول.');
+                showError('الرجاء إدخال قيم صحيحة لجميع الحقول المحددة باللون الأحمر.');
                 return;
             }
-            
-            const manualTotalHours = parseFloat(totalHoursInput.value);
-            if (isNaN(manualTotalHours) || manualTotalHours <= 0) {
-                totalHoursInput.classList.add('border-red-500');
-                showError('الرجاء إدخال إجمالي عدد ساعات للقسمة صحيح وأكبر من صفر.');
+
+            // Calculate total hours automatically
+            const totalHours = calculateTotalHours();
+            if (totalHours <= 0) {
+                showError('إجمالي الساعات يجب أن يكون أكبر من صفر.');
                 return;
-            } else {
-                totalHoursInput.classList.remove('border-red-500');
             }
 
-            const finalGPA = totalWeightedPoints / manualTotalHours;
-            const letterGrade = getLetterGrade(finalGPA);
+            const finalGPA = totalWeightedPoints / totalHours;
+            const gradeInfo = getGradeDetails(finalGPA);
 
-            totalPointsResult.textContent = totalWeightedPoints.toFixed(2);
-            gpaResult.textContent = finalGPA.toFixed(2);
-            gpaGrade.textContent = letterGrade;
-            resultContainer.classList.remove('hidden');
+            // Populate Modal Card Information
+            cardGpaVal.textContent = finalGPA.toFixed(2);
+            cardGradeVal.textContent = `${gradeInfo.arabic} (${gradeInfo.letter})`;
+            cardHoursVal.textContent = `${totalHours} ساعة`;
+
+            // Open Modal
+            openModal();
+
+            // Trigger visual celebrations
+            triggerCelebration();
+            showFloatingQuotes();
         }
 
-        // Prayer Modal Functionality
+        // Annual GPA calculation logic
+        function calculateAnnualGPA() {
+            hideError();
+
+            const term1GpaEl = document.getElementById('term1-gpa');
+            const term1HoursEl = document.getElementById('term1-hours');
+            const term2GpaEl = document.getElementById('term2-gpa');
+            const term2HoursEl = document.getElementById('term2-hours');
+
+            const gpa1 = parseFloat(term1GpaEl.value);
+            const h1 = parseFloat(term1HoursEl.value);
+            const gpa2 = parseFloat(term2GpaEl.value);
+            const h2 = parseFloat(term2HoursEl.value);
+
+            term1GpaEl.classList.remove('border-red-500', 'border-slate-800');
+            term1HoursEl.classList.remove('border-red-500', 'border-slate-800');
+            term2GpaEl.classList.remove('border-red-500', 'border-slate-800');
+            term2HoursEl.classList.remove('border-red-500', 'border-slate-800');
+
+            let isValid = true;
+
+            if (isNaN(gpa1) || gpa1 < 0 || gpa1 > 4) {
+                term1GpaEl.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                term1GpaEl.classList.add('border-slate-800');
+            }
+
+            if (isNaN(h1) || h1 < 0) {
+                term1HoursEl.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                term1HoursEl.classList.add('border-slate-800');
+            }
+
+            if (isNaN(gpa2) || gpa2 < 0 || gpa2 > 4) {
+                term2GpaEl.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                term2GpaEl.classList.add('border-slate-800');
+            }
+
+            if (isNaN(h2) || h2 < 0) {
+                term2HoursEl.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                term2HoursEl.classList.add('border-slate-800');
+            }
+
+            if (!isValid) {
+                showError('الرجاء إدخال قيم صحيحة للمعدل (من 0 إلى 4) وللساعات (قيمة موجبة).');
+                return;
+            }
+
+            const totalHours = h1 + h2;
+            if (totalHours <= 0) {
+                showError('إجمالي الساعات للترمين يجب أن يكون أكبر من صفر.');
+                return;
+            }
+
+            // Formula: ((GPA1 * H1) + (GPA2 * H2)) / (H1 + H2)
+            const annualGPA = ((gpa1 * h1) + (gpa2 * h2)) / totalHours;
+            const gradeInfo = getGradeDetails(annualGPA);
+
+            // Populate Card Details
+            cardGpaVal.textContent = annualGPA.toFixed(2);
+            cardGradeVal.textContent = `${gradeInfo.arabic} (${gradeInfo.letter})`;
+            cardHoursVal.textContent = `${totalHours} ساعة`;
+
+            // Open modal and celebrate
+            openModal();
+            triggerCelebration();
+            showFloatingQuotes();
+        }
+
+        // Image capture logic using html2canvas
+        async function getCardCanvas() {
+            const cardEl = document.getElementById('gpa-card');
+            const editBtn = document.getElementById('edit-name-btn');
+            const editHint = document.getElementById('edit-name-hint');
+            const yearSelect = document.getElementById('card-year-select');
+            const yearArrow = document.getElementById('card-year-select-arrow');
+            const cardYearContainer = document.getElementById('card-year-container');
+
+            // 1. Remove text focus, selection, and keyboard outline before drawing
+            cardStudentName.blur();
+            window.getSelection().removeAllRanges();
+
+            // Save active styling details to restore later
+            const activeBorderBottom = cardStudentName.style.borderBottomStyle;
+
+            // 2. Hide edit helper buttons & dashed borders from the captured canvas
+            if (editBtn) editBtn.style.visibility = 'hidden';
+            if (editHint) editHint.style.display = 'none';
+            cardStudentName.style.borderBottomStyle = 'none';
+
+            // Handle dropdown list replacement during capture to look clean in PNG
+            let tempSpan = null;
+            if (yearSelect && !cardYearContainer.classList.contains('hidden')) {
+                tempSpan = document.createElement('span');
+                tempSpan.className = yearSelect.className;
+                tempSpan.style.borderBottom = 'none';
+                tempSpan.style.padding = '0 4px';
+                tempSpan.textContent = yearSelect.value;
+
+                yearSelect.parentNode.insertBefore(tempSpan, yearSelect);
+                yearSelect.style.display = 'none';
+                if (yearArrow) yearArrow.style.display = 'none';
+            }
+
+            // Generate canvas with higher scale for HD quality capture
+            const canvas = await html2canvas(cardEl, {
+                scale: 3,
+                useCORS: true,
+                backgroundColor: null,
+                logging: false
+            });
+
+            // 3. Restore visibility of edit buttons and dashed borders for UI
+            if (editBtn) editBtn.style.visibility = 'visible';
+            if (editHint) editHint.style.display = 'block';
+            cardStudentName.style.borderBottomStyle = activeBorderBottom || 'dashed';
+
+            if (tempSpan) {
+                tempSpan.parentNode.removeChild(tempSpan);
+                yearSelect.style.display = '';
+                if (yearArrow) yearArrow.style.display = '';
+            }
+
+            return canvas;
+        }
+
+        saveImgBtn.addEventListener('click', async () => {
+            try {
+                saveImgBtn.disabled = true;
+                const canvas = await getCardCanvas();
+                const dataUrl = canvas.toDataURL('image/png');
+
+                // Create download link
+                const link = document.createElement('a');
+                link.download = `GPA_Success_Card_${Date.now()}.png`;
+                link.href = dataUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showToast('تم حفظ بطاقة التفوق كصورة بنجاح! 🎉', 'success');
+            } catch (err) {
+                console.error(err);
+                showToast('عذراً، فشل تصدير الصورة.');
+            } finally {
+                saveImgBtn.disabled = false;
+            }
+        });
+
+        // Prayer Modal closing handler
         const prayerModal = document.getElementById('prayer-modal');
         const prayerBtn = document.getElementById('prayer-btn');
-        
-        prayerBtn.addEventListener('click', function() {
-            prayerModal.style.display = 'none';
+        prayerBtn.addEventListener('click', function () {
+            prayerModal.classList.add('opacity-0');
+            setTimeout(() => {
+                prayerModal.style.display = 'none';
+            }, 300);
+        });
+
+        // Close modal handlers
+        closeModalBtn.addEventListener('click', closeModal);
+        closeModalX.addEventListener('click', closeModal);
+        gpaModal.addEventListener('click', (e) => {
+            if (e.target === gpaModal) closeModal();
         });
 
         // Event Listeners
         addSubjectBtn.addEventListener('click', addSubject);
         calculateGpaBtn.addEventListener('click', calculateGPA);
+        document.getElementById('calculate-annual-gpa-btn').addEventListener('click', calculateAnnualGPA);
 
-        // Initial State
+        // Initial setup - add first row
         addSubject();
     </script>
-    
-    <style>
-        @keyframes fade-in {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-            animation: fade-in 0.3s ease-out forwards;
-        }
-    </style>
-
 </body>
+
 </html>
